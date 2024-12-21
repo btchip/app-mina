@@ -1,5 +1,21 @@
 # ledger-app-mina
 
+Quick and dirty modification for Aligned Genesis Drop Registration 
+
+Build as described below 
+
+Get your address with 
+
+```bash
+./utils/mina_ledger_wallet.py --get-address 0
+```
+
+Sign your nonce with
+
+```bash
+./utils/mina_ledger_wallet.py sign-message --network mainnet 0 "nonce"
+```
+
 ## Overview
 This is the Mina app for the Ledger Nano S and Nano X hardware wallet.
 
