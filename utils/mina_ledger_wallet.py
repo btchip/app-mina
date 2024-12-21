@@ -703,7 +703,7 @@ def rosetta_parse_request(tx, signed):
 def ledger_init():
     global DONGLE
     try:
-        DONGLE = ledgerblue.getDongle(debug=True)
+        DONGLE = ledgerblue.getDongle(debug=False)
     except ledgerblue.CommException as ex:
         if ex.sw == 26368:
             print("Ledger app not open")
