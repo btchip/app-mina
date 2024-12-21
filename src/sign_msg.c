@@ -21,6 +21,7 @@ void handle_sign_msg(uint8_t p1, uint8_t p2, uint8_t *dataBuffer,
     ROInput   roinput = roinput_create(input_fields, bits);
     uint32_t  account;
     uint8_t network;
+    uint8_t i;
 
     if ((dataLength < 5) || (dataLength > 5 + TX_BITSTRINGS_BYTES)) {
         THROW(INVALID_PARAMETER);
@@ -28,6 +29,13 @@ void handle_sign_msg(uint8_t p1, uint8_t p2, uint8_t *dataBuffer,
 
     account = read_uint32_be(dataBuffer);
     network = dataBuffer[4];
+
+    for (i=0; i < dataLength - 5; i++) {
+        uint8_t digit = dataBuffer[5 + i];
+        if (digit != '\r' && digit != '\n' && !(digit - 0x20 < 0x5f)) {
+            THROW(INVALID_PARAMETER);
+        }
+    }
 
     generate_keypair(&kp, account);
     
