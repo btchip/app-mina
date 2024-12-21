@@ -2,7 +2,7 @@
 
 Quick and dirty modification for Aligned Genesis Drop Registration 
 
-Build as described below 
+Build as described below (not possible for Nano X)
 
 Get your address with 
 
