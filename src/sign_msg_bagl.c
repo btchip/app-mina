@@ -4,8 +4,10 @@
 #include "utils.h"
 #include "transaction.h" // for TX_BITSTRINGS_BYTES
 
-static char _msg[TX_BITSTRINGS_BYTES + 1];
-static char _account[20];
+// Account buffer size (uint32 max = "4294967295" = 10 chars + null)
+#define MAX_ACCOUNT_STR_LEN 11
+static char _msg[TX_BITSTRINGS_BYTES + 1];  // +1 for null terminator
+static char _account[MAX_ACCOUNT_STR_LEN];
 static uint8_t _network;
 static uint8_t _msg_data[TX_BITSTRINGS_BYTES];
 static uint8_t _msg_length;
@@ -115,20 +117,28 @@ UX_FLOW(ux_sign_msg_flow_mainnet,
 
 void ui_sign_msg(uint8_t *dataBuffer, uint8_t dataLength)
 {
-    // Store message data for signing callback
+    if (dataLength < 5 || dataLength > TX_BITSTRINGS_BYTES) {
+        THROW(INVALID_PARAMETER);
+    }
+
+    // Store raw data for signing
     memcpy(_msg_data, dataBuffer, dataLength);
     _msg_length = dataLength;
 
-    // Extract account and network
+    // Format account for display
     uint32_t account = read_uint32_be(dataBuffer);
-    _network = dataBuffer[4];
-
-    // Format account number
     snprintf(_account, sizeof(_account), "%d", account);
 
-    // Copy message
-    memcpy(_msg, dataBuffer + 5, dataLength - 5);
-    _msg[dataLength - 5] = '\0';
+    // Store network ID (1 byte)
+    _network = dataBuffer[4];
+
+    // Copy message for display (+1 for null terminator)
+    size_t msg_display_len = dataLength - 5;
+    if (msg_display_len > TX_BITSTRINGS_BYTES) {
+        THROW(INVALID_PARAMETER);
+    }
+    memcpy(_msg, dataBuffer + 5, msg_display_len);
+    _msg[msg_display_len] = '\0';
 
     // Show appropriate flow
     if (_network == MAINNET_ID) {

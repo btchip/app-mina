@@ -6,9 +6,10 @@
 #include "transaction.h" // for TX_BITSTRINGS_BYTES
 
 #define MAX_ELEM_CNT 3
+#define MAX_ACCOUNT_STR_LEN 11
 
-static char _msg[TX_BITSTRINGS_BYTES + 1];
-static char _account[20];
+static char _msg[TX_BITSTRINGS_BYTES + 1];  // +1 for null terminator
+static char _account[MAX_ACCOUNT_STR_LEN];
 static uint8_t _network;
 static uint8_t _msg_data[TX_BITSTRINGS_BYTES];
 static uint8_t _msg_length;
@@ -22,7 +23,7 @@ static MessageContext_t messageContext;
 
 static void review_choice(bool confirm) {
     if (confirm) {
-        nbgl_useCaseSpinner("Processing");
+        nbgl_useCaseSpinner("Signing message");
         sign_message(_msg_data, _msg_length);
         nbgl_useCaseReviewStatus(STATUS_TYPE_MESSAGE_SIGNED, ui_idle);
     } else {
@@ -54,24 +55,28 @@ static void prepare_message_context(void) {
 
 void ui_sign_msg(uint8_t *dataBuffer, uint8_t dataLength)
 {
-    // Store message data for signing callback
+    if (dataLength < 5 || dataLength > TX_BITSTRINGS_BYTES) {
+        THROW(INVALID_PARAMETER);
+    }
+
+    // Store raw data for signing
     memcpy(_msg_data, dataBuffer, dataLength);
     _msg_length = dataLength;
 
-    // Extract account and network
+    // Format account number for display
     uint32_t account = read_uint32_be(dataBuffer);
-    _network = dataBuffer[4];
-
-    // Format account number
     snprintf(_account, sizeof(_account), "%d", account);
 
-    // Copy message
-    memcpy(_msg, dataBuffer + 5, dataLength - 5);
-    _msg[dataLength - 5] = '\0';
+    // Store network ID
+    _network = dataBuffer[4];
+
+    // Copy message for display
+    size_t msg_display_len = dataLength - 5;
+    memcpy(_msg, dataBuffer + 5, msg_display_len);
+    _msg[msg_display_len] = '\0';
 
     prepare_message_context();
 
-    // Start review
     nbgl_useCaseReview(TYPE_MESSAGE,
                        &messageContext.tagValueList,
                        &C_Mina_64px,
