@@ -2,7 +2,7 @@
 
 Quick and dirty modification for Aligned Genesis Drop Registration 
 
-Build and sideload as described below (not possible for Nano X)
+Build and sideload as described below (not possible for Nano X) - make sure to have the latest available firmware on your device
 
 Get your address with 
 
