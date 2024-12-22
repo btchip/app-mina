@@ -16,6 +16,14 @@ Sign your nonce with
 ./utils/mina_ledger_wallet.py sign-message --network mainnet 0 "nonce"
 ```
 
+There's no confirmation on screen when signing the nonce because it's a proof of concept.
+
+After getting your signature you can delete this application and reinstall the official one with Ledger Live
+
+```bash
+make delete
+```
+
 ## Overview
 This is the Mina app for the Ledger Nano S and Nano X hardware wallet.
 
