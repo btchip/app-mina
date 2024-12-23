@@ -13,15 +13,22 @@ void handle_sign_msg(uint8_t p1, uint8_t p2, uint8_t *dataBuffer,
 {
     UNUSED(p1);
     UNUSED(p2);
-    UNUSED(flags);
+    UNUSED(tx);
+
+    ui_sign_msg(dataBuffer, dataLength);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
+void sign_message(uint8_t *dataBuffer, uint8_t dataLength)
+{
     Keypair   kp;
     Signature sig;
-    Field   input_fields[0];
-    uint8_t bits[TX_BITSTRINGS_BYTES];
+    Field     input_fields[0];
+    uint8_t   bits[TX_BITSTRINGS_BYTES];
     ROInput   roinput = roinput_create(input_fields, bits);
     uint32_t  account;
-    uint8_t network;
-    uint8_t i;
+    uint8_t   network;
+    uint8_t   i;
 
     if ((dataLength < 5) || (dataLength > 5 + TX_BITSTRINGS_BYTES)) {
         THROW(INVALID_PARAMETER);
@@ -38,7 +45,7 @@ void handle_sign_msg(uint8_t p1, uint8_t p2, uint8_t *dataBuffer,
     }
 
     generate_keypair(&kp, account);
-    
+
     roinput_add_bytes_le(&roinput, dataBuffer + 5, dataLength - 5);
 
     if (!sign(&sig, &kp, &roinput, network)) {
@@ -47,7 +54,6 @@ void handle_sign_msg(uint8_t p1, uint8_t p2, uint8_t *dataBuffer,
 
     memmove(G_io_apdu_buffer, &sig, sizeof(sig));
 
-    *tx = sizeof(sig);
-    THROW(0x9000);  
+    sendResponse(sizeof(sig), true);
 }
 
